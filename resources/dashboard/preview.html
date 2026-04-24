@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reachy Care — Design system preview</title>
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        .preview-main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
+        .preview-title { font-family: var(--serif); font-size: var(--fs-3xl); margin: 32px 0 8px; color: var(--ink); font-weight: 500; letter-spacing: -0.01em; }
+        .preview-section-title { font-family: var(--serif); font-size: var(--fs-xl); margin: 28px 0 14px; color: var(--ink-2); font-weight: 500; }
+        .preview-note { color: var(--ink-3); font-style: italic; margin-bottom: 18px; font-size: var(--fs-sm); }
+        .postures-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; margin: 14px 0 28px; }
+        .posture-card { background: var(--paper-2); border-radius: var(--r-lg); border: 1px solid var(--hairline); padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: var(--shadow-soft); }
+        .posture-label { font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.08em; }
+        .icons-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 12px; margin: 14px 0; }
+        .icon-tile { background: var(--paper-2); border: 1px solid var(--hairline); border-radius: var(--r-md); padding: 16px 8px; display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--ink); }
+        .icon-tile .label { font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-3); }
+        .palette-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+        .swatch { padding: 16px 12px; border-radius: var(--r-md); border: 1px solid var(--hairline); font-family: var(--mono); font-size: var(--fs-xs); }
+        .swatch-name { font-weight: 600; margin-bottom: 4px; }
+        .swatch-val { opacity: 0.7; }
+        .demo-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+        .divider { height: 1px; background: var(--hairline); margin: 36px 0 4px; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-top" style="max-width: 1100px; margin: 0 auto; padding: 0 16px;">
+            <div class="header-identity">
+                <div class="robot-avatar" id="header-avatar"></div>
+                <div class="header-text">
+                    <h1>Reachy Care</h1>
+                    <span class="badge badge-online">En ligne</span>
+                </div>
+            </div>
+            <div class="power-controls">
+                <button class="power-btn power-on" data-tooltip="Allumer" id="btn-on"></button>
+                <button class="power-btn power-sleep" data-tooltip="Veille" id="btn-sleep"></button>
+                <button class="power-btn power-wake" data-tooltip="Réveil" id="btn-wake"></button>
+                <button class="power-btn power-off" data-tooltip="Arrêt" id="btn-off"></button>
+                <a href="#" class="settings-link" data-tooltip="Paramètres" id="link-settings"></a>
+            </div>
+        </div>
+        <div class="header-indicators" style="max-width: 1100px; margin: 0 auto; padding: 0 16px;">
+            <div class="indicator">
+                <span class="indicator-label">Mode</span>
+                <span class="indicator-value">conversation</span>
+            </div>
+            <div class="indicator">
+                <span class="indicator-label">Personne</span>
+                <span class="indicator-value">Alexandre</span>
+            </div>
+            <div class="indicator">
+                <span class="indicator-label">Uptime</span>
+                <span class="indicator-value">01:24:36</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="preview-main">
+        <h1 class="preview-title">Design system preview</h1>
+        <p class="preview-note">Reachy Care dashboard — habillage Eiffel AI (cream / terracotta / ink, Fraunces + Inter + JetBrains Mono).</p>
+
+        <h2 class="preview-section-title">Reachy — 6 postures aquarelle</h2>
+        <div class="postures-grid" id="postures-grid"></div>
+
+        <h2 class="preview-section-title">Icônes hand-drawn</h2>
+        <div class="icons-grid" id="icons-grid"></div>
+
+        <h2 class="preview-section-title">Palette Eiffel AI</h2>
+        <div class="palette-grid">
+            <div class="swatch" style="background: var(--paper); color: var(--ink);"><div class="swatch-name">paper</div><div class="swatch-val">cream page bg</div></div>
+            <div class="swatch" style="background: var(--paper-2); color: var(--ink);"><div class="swatch-name">paper-2</div><div class="swatch-val">card wash</div></div>
+            <div class="swatch" style="background: var(--paper-3); color: var(--ink);"><div class="swatch-name">paper-3</div><div class="swatch-val">deeper wash</div></div>
+            <div class="swatch" style="background: var(--terra-brand-wash); color: var(--terra-brand-ink);"><div class="swatch-name">terra-brand</div><div class="swatch-val">Eiffel accent</div></div>
+            <div class="swatch" style="background: var(--sage-wash); color: var(--sage-ink);"><div class="swatch-name">sage</div><div class="swatch-val">tout va bien</div></div>
+            <div class="swatch" style="background: var(--rose-wash); color: var(--rose-ink);"><div class="swatch-name">rose</div><div class="swatch-val">Reachy signature</div></div>
+            <div class="swatch" style="background: var(--sky-wash); color: var(--sky-ink);"><div class="swatch-name">sky</div><div class="swatch-val">info</div></div>
+            <div class="swatch" style="background: var(--ochre-wash); color: var(--ochre-ink);"><div class="swatch-name">ochre</div><div class="swatch-val">warning</div></div>
+            <div class="swatch" style="background: var(--terra-wash); color: var(--terra-ink);"><div class="swatch-name">terra</div><div class="swatch-val">critical</div></div>
+            <div class="swatch" style="background: var(--ink); color: var(--paper);"><div class="swatch-name">ink</div><div class="swatch-val">text principal</div></div>
+        </div>
+
+        <h2 class="preview-section-title">Boutons</h2>
+        <div class="commands-grid" style="max-width: 560px;">
+            <button class="cmd-btn"><span class="cmd-icon">🎵</span><span>Musique</span></button>
+            <button class="cmd-btn cmd-btn-danger"><span class="cmd-icon">🔇</span><span>Stop</span></button>
+            <button class="cmd-btn cmd-btn-accent"><span class="cmd-icon">📖</span><span>Histoire</span></button>
+        </div>
+
+        <h2 class="preview-section-title">Carte avec toggle, badges, journal</h2>
+        <section class="card" style="max-width: 640px;">
+            <div class="section-header">
+                <h2>Attention (AttenLabs)</h2>
+                <label class="toggle">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <p class="placeholder" style="text-align: left; padding: 0 0 14px;">
+                Reachy regarde son interlocuteur et se tourne vers lui automatiquement.
+            </p>
+            <div class="demo-row">
+                <span class="badge badge-online">En ligne</span>
+                <span class="badge badge-offline">Hors ligne</span>
+                <span class="badge badge-sleeping">En veille</span>
+            </div>
+            <table class="journal-table" style="margin-top: 14px;">
+                <thead><tr><th>Heure</th><th></th><th>Événement</th></tr></thead>
+                <tbody>
+                    <tr><td class="journal-time">09:14</td><td class="journal-category">💊</td><td class="journal-text">Prise Doliprane confirmée</td></tr>
+                    <tr><td class="journal-time">10:32</td><td class="journal-category">📖</td><td class="journal-text">Chapitre Galileo terminé</td></tr>
+                    <tr><td class="journal-time">11:47</td><td class="journal-category">☎️</td><td class="journal-text">Appel famille programmé</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <h2 class="preview-section-title">Logs</h2>
+        <section class="card" style="max-width: 640px;">
+            <div class="logs-container">
+                <div id="logs-demo">
+<span class="log-line log-info">[2026-04-22 14:03:12] reachy-care-main started (pid 4821)</span>
+<span class="log-line">[2026-04-22 14:03:14] camera pipeline ready, fps 15</span>
+<span class="log-line">[2026-04-22 14:03:15] conv_app_v2 IPC connected</span>
+<span class="log-line log-warning">[2026-04-22 14:04:02] wifi rssi -68 dBm (weak signal)</span>
+<span class="log-line log-error">[2026-04-22 14:05:17] daemon gRPC timeout retry 1/3</span>
+<span class="log-line log-info">[2026-04-22 14:05:19] daemon gRPC recovered</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="./components/icons.js"></script>
+    <script src="./components/reachy.js"></script>
+    <script>
+        // Header avatar
+        const headerAvatar = document.getElementById('header-avatar');
+        headerAvatar.replaceChildren(Reachy.render('idle', 56, { showWash: false }));
+
+        // Power buttons
+        document.getElementById('btn-on').appendChild(Icons.svg('powerOn', 22));
+        document.getElementById('btn-sleep').appendChild(Icons.svg('moon', 22));
+        document.getElementById('btn-wake').appendChild(Icons.svg('wake', 22));
+        document.getElementById('btn-off').appendChild(Icons.svg('powerOff', 22));
+        document.getElementById('link-settings').appendChild(Icons.svg('gear', 22));
+
+        // Posture gallery
+        const postureGrid = document.getElementById('postures-grid');
+        for (const posture of ['idle', 'listen', 'speak', 'read', 'alert', 'sleep']) {
+            const card = document.createElement('div');
+            card.className = 'posture-card';
+            card.appendChild(Reachy.render(posture, 140));
+            const label = document.createElement('div');
+            label.className = 'posture-label';
+            label.textContent = posture;
+            card.appendChild(label);
+            postureGrid.appendChild(card);
+        }
+
+        // Icon gallery
+        const iconGrid = document.getElementById('icons-grid');
+        for (const name of Icons.names()) {
+            const tile = document.createElement('div');
+            tile.className = 'icon-tile';
+            tile.appendChild(Icons.svg(name, 28));
+            const lbl = document.createElement('div');
+            lbl.className = 'label';
+            lbl.textContent = name;
+            tile.appendChild(lbl);
+            iconGrid.appendChild(tile);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Reachy Care — Connexion Wifi</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header id="header" class="header-grid">
+    <div class="header-identity">
+        <div class="robot-avatar" id="robot-avatar"></div>
+        <div class="header-text">
+            <h1>Reachy Care</h1>
+            <span class="badge badge-sleeping">Connexion requise</span>
+        </div>
+    </div>
+</header>
+
+<div class="settings-wrap">
+
+<div class="settings-card" style="background: var(--paper);">
+    <h3 style="cursor: default;">Bienvenue</h3>
+    <p>Reachy n'est pas encore connecté à Internet. Sélectionne ton réseau wifi pour continuer. Une fois connecté, cette page disparaîtra et le dashboard complet s'ouvrira automatiquement.</p>
+
+    <h4 style="margin-top:18px;">Réseaux disponibles</h4>
+    <div class="settings-row settings-row-tight">
+        <button class="btn-settings" onclick="wifiScan()" id="btn-wifi-scan">Rescanner</button>
+        <small class="settings-hint">Le scan prend quelques secondes.</small>
+    </div>
+    <div class="wifi-scan-list" id="wifi-scan-list">
+        <p class="placeholder" style="text-align:left; padding:6px 0;">Chargement...</p>
+    </div>
+
+    <h4 style="margin-top:18px;">Réseau caché</h4>
+    <div class="settings-form">
+        <label>SSID</label>
+        <input id="wifiManualSsid" placeholder="Nom du réseau" />
+        <label>Mot de passe</label>
+        <input id="wifiManualPwd" type="password" placeholder="Laisser vide si ouvert" />
+        <button class="btn-settings btn-accent" onclick="wifiConnectManual()">Connecter</button>
+    </div>
+
+    <div id="msg-wifi" class="msg"></div>
+</div>
+
+</div>
+
+<script src="/static/components/icons.js"></script>
+<script src="/static/components/reachy.js"></script>
+<script>
+(function hydrate() {
+    const avatar = document.getElementById('robot-avatar');
+    if (avatar && window.Reachy) {
+        avatar.replaceChildren(Reachy.render('alert', 48, { showWash: false }));
+    }
+})();
+
+function _clearNode(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+function showMsg(id, text, cls) {
+    const el = document.getElementById('msg-' + id);
+    if (!el) return;
+    el.textContent = text;
+    el.className = 'msg ' + cls;
+    el.style.display = 'block';
+}
+
+function renderScan(networks) {
+    const container = document.getElementById('wifi-scan-list');
+    _clearNode(container);
+    if (!networks.length) {
+        const p = document.createElement('p');
+        p.className = 'placeholder';
+        p.style.textAlign = 'left';
+        p.style.padding = '6px 0';
+        p.textContent = 'Aucun réseau détecté. Rescanne dans quelques secondes.';
+        container.appendChild(p);
+        return;
+    }
+    networks.forEach(net => {
+        const row = document.createElement('div');
+        row.className = 'wifi-scan-item' + (net.saved ? ' is-saved' : '');
+
+        const ssid = document.createElement('span');
+        ssid.className = 'wifi-scan-ssid';
+        ssid.textContent = net.ssid;
+
+        const rssi = document.createElement('span');
+        rssi.className = 'wifi-scan-rssi';
+        rssi.textContent = (net.rssi ?? '?') + ' dBm';
+
+        const btn = document.createElement('button');
+        btn.className = 'btn-settings btn-wifi-connect';
+        btn.textContent = net.saved ? 'Connecter' : 'Connecter…';
+        btn.addEventListener('click', () => wifiConnect(net.ssid, !net.saved && net.security && net.security !== 'open'));
+
+        row.appendChild(ssid);
+        row.appendChild(rssi);
+        row.appendChild(btn);
+        container.appendChild(row);
+    });
+}
+
+async function wifiScan() {
+    const btn = document.getElementById('btn-wifi-scan');
+    if (btn) btn.disabled = true;
+    try {
+        const r = await fetch('/api/wifi/scan');
+        const j = await r.json();
+        if (!j.ok) throw new Error(j.error || 'Scan failed');
+        renderScan(j.networks || []);
+    } catch (e) {
+        showMsg('wifi', 'Erreur scan : ' + e.message, 'err');
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+async function wifiConnect(ssid, askPassword) {
+    let password = null;
+    if (askPassword) {
+        password = prompt('Mot de passe pour ' + ssid + ' :');
+        if (password === null) return;
+    }
+    showMsg('wifi', 'Connexion à ' + ssid + '…', 'ok');
+    try {
+        const r = await fetch('/api/wifi/connect', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ssid, password: password || ''}),
+        });
+        const j = await r.json();
+        if (!j.ok) { showMsg('wifi', j.error || 'Erreur', 'err'); return; }
+        showMsg('wifi', 'Connecté. Redirection dans 5 s…', 'ok');
+        setTimeout(() => { window.location.href = 'https://reachy-care.eiffelai.io/'; }, 5000);
+    } catch (e) {
+        showMsg('wifi', 'Erreur réseau : ' + e.message, 'err');
+    }
+}
+
+function wifiConnectManual() {
+    const ssid = (document.getElementById('wifiManualSsid').value || '').trim();
+    const pwd = document.getElementById('wifiManualPwd').value;
+    if (!ssid) { showMsg('wifi', 'SSID obligatoire', 'err'); return; }
+    fetch('/api/wifi/connect', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ssid, password: pwd}),
+    })
+    .then(r => r.json())
+    .then(j => {
+        if (!j.ok) { showMsg('wifi', j.error || 'Erreur', 'err'); return; }
+        showMsg('wifi', 'Connecté. Redirection dans 5 s…', 'ok');
+        setTimeout(() => { window.location.href = 'https://reachy-care.eiffelai.io/'; }, 5000);
+    })
+    .catch(e => showMsg('wifi', 'Erreur réseau : ' + e.message, 'err'));
+}
+
+wifiScan();
+</script>
+</body>
+</html>

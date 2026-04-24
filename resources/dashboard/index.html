@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Reachy Care</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .landing-wrap {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 32px 20px 60px;
+            gap: 28px;
+        }
+        .landing-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .landing-title {
+            font-family: var(--serif);
+            font-size: var(--fs-3xl);
+            font-weight: 500;
+            color: var(--ink);
+            letter-spacing: -0.01em;
+            margin: 0;
+        }
+        .landing-subtitle {
+            font-family: var(--sans);
+            font-size: var(--fs-lg);
+            color: var(--ink-2);
+            max-width: 480px;
+            line-height: 1.5;
+            margin: 0;
+        }
+        .landing-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: var(--paper-2);
+            border: 1px solid var(--hairline);
+            font-family: var(--mono);
+            font-size: var(--fs-sm);
+            color: var(--ink-2);
+        }
+        .landing-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--ochre);
+            box-shadow: 0 0 0 0 var(--ochre);
+            animation: landing-pulse 2s ease-in-out infinite;
+        }
+        @keyframes landing-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(200, 140, 40, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(200, 140, 40, 0); }
+        }
+        .landing-dot.up { background: var(--sage); }
+        .landing-dot.up { animation-name: landing-pulse-up; }
+        @keyframes landing-pulse-up {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(90, 160, 90, 0.45); }
+            50% { box-shadow: 0 0 0 8px rgba(90, 160, 90, 0); }
+        }
+        .landing-tip {
+            color: var(--ink-3);
+            font-size: var(--fs-sm);
+            font-style: italic;
+            max-width: 420px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="landing-wrap">
+    <div class="landing-avatar" id="landing-avatar"></div>
+
+    <h1 class="landing-title" id="landing-title">Allume Reachy</h1>
+
+    <p class="landing-subtitle" id="landing-subtitle">
+        Branche-le à une prise. Il se réveille tout seul et cette page bascule automatiquement dès qu'il est prêt.
+    </p>
+
+    <div class="landing-status">
+        <span class="landing-dot" id="landing-dot"></span>
+        <span id="landing-state-text">En attente de Reachy…</span>
+    </div>
+
+    <p class="landing-tip" id="landing-tip">
+        Tant qu'il n'est pas branché, cette page reste ici. Aucune manipulation à faire.
+    </p>
+</div>
+
+<script src="/static/config.js"></script>
+<script src="/static/components/icons.js"></script>
+<script src="/static/components/reachy.js"></script>
+<script>
+(function () {
+    const POLL_MS = 3000;
+    const avatar = document.getElementById('landing-avatar');
+    const title = document.getElementById('landing-title');
+    const subtitle = document.getElementById('landing-subtitle');
+    const dot = document.getElementById('landing-dot');
+    const stateText = document.getElementById('landing-state-text');
+    const tip = document.getElementById('landing-tip');
+    let currentPosture = 'sleep';
+    let redirected = false;
+
+    function setPosture(posture) {
+        if (posture === currentPosture) return;
+        currentPosture = posture;
+        if (window.Reachy && avatar) {
+            avatar.replaceChildren(Reachy.render(posture, 280));
+        }
+    }
+    setPosture('sleep');
+
+    async function pingReachy() {
+        try {
+            const r = await fetch('/api/health', {
+                method: 'GET',
+                cache: 'no-store',
+                credentials: 'include',
+            });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const j = await r.json();
+            if (j && j.ok) return j;
+        } catch (e) { /* fall through */ }
+        return null;
+    }
+
+    function redirectToDashboard() {
+        if (redirected) return;
+        redirected = true;
+        setPosture('listen');
+        title.textContent = 'Reachy est prêt';
+        subtitle.textContent = 'Un instant, on ouvre le tableau de bord.';
+        dot.classList.add('up');
+        stateText.textContent = 'Connecté';
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 900);
+    }
+
+    async function loop() {
+        const health = await pingReachy();
+        if (health) {
+            redirectToDashboard();
+            return;
+        }
+        setTimeout(loop, POLL_MS);
+    }
+
+    loop();
+})();
+</script>
+</body>
+</html>

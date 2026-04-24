@@ -1,0 +1,263 @@
+/* Reachy Care — design tokens
+   Warm watercolor palette, Fraunces + Inter typography.
+   All colors tuned for AAA contrast where used on text surfaces. */
+
+:root {
+  /* Paper & ink — Eiffel AI palette (warm cream + ink navy + terracotta) */
+  --paper:        oklch(96% 0.012 80);     /* cream, page bg */
+  --paper-2:      oklch(93% 0.018 75);     /* card wash */
+  --paper-3:      oklch(89% 0.022 72);     /* deeper wash, dividers */
+  --ink:          oklch(28% 0.035 255);    /* deep ink navy — body text */
+  --ink-2:        oklch(44% 0.030 250);    /* secondary */
+  --ink-3:        oklch(58% 0.022 245);    /* tertiary */
+  --hairline:     oklch(84% 0.018 70);
+
+  /* Terracotta — signature Eiffel AI accent */
+  --terra-brand:     oklch(62% 0.135 40);
+  --terra-brand-ink: oklch(42% 0.115 38);
+  --terra-brand-wash:oklch(93% 0.042 35);
+
+  /* Accents — watercolor hues, low chroma */
+  --sage:         oklch(62% 0.075 155);    /* "tout va bien" */
+  --sage-ink:     oklch(36% 0.055 155);
+  --sage-wash:    oklch(92% 0.035 155);
+
+  --rose:         oklch(72% 0.085 25);     /* Reachy signature */
+  --rose-ink:     oklch(42% 0.090 28);
+  --rose-wash:    oklch(93% 0.035 25);
+
+  --sky:          oklch(72% 0.060 230);    /* info */
+  --sky-ink:      oklch(38% 0.065 230);
+  --sky-wash:     oklch(94% 0.030 230);
+
+  --ochre:        oklch(74% 0.115 72);     /* warning */
+  --ochre-ink:    oklch(44% 0.095 65);
+  --ochre-wash:   oklch(94% 0.045 72);
+
+  --terra:        oklch(56% 0.155 28);     /* critical only */
+  --terra-ink:    oklch(36% 0.125 28);
+  --terra-wash:   oklch(92% 0.045 28);
+
+  /* Type */
+  --serif: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --sans:  "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  --mono:  "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 15px;
+  --fs-lg: 17px;
+  --fs-xl: 20px;
+  --fs-2xl: 26px;
+  --fs-3xl: 34px;
+  --fs-4xl: 46px;
+
+  /* Spacing & radius */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+
+  --shadow-soft: 0 1px 2px rgba(60,40,20,0.04), 0 6px 20px rgba(60,40,20,0.05);
+  --shadow-lift: 0 2px 4px rgba(60,40,20,0.06), 0 12px 32px rgba(60,40,20,0.08);
+}
+
+/* Color mood variants (driven by .mood-* class on root) */
+.mood-dawn {
+  --paper:        oklch(97.5% 0.018 70);
+  --paper-2:      oklch(94% 0.028 55);
+  --paper-3:      oklch(90% 0.035 45);
+}
+.mood-dusk {
+  --paper:        oklch(95.5% 0.018 290);
+  --paper-2:      oklch(92% 0.028 295);
+  --paper-3:      oklch(88% 0.032 300);
+  --ink:          oklch(26% 0.030 290);
+  --ink-2:        oklch(44% 0.032 290);
+}
+.mood-mist {
+  --paper:        oklch(97% 0.008 210);
+  --paper-2:      oklch(94% 0.014 205);
+  --paper-3:      oklch(90% 0.020 200);
+}
+
+/* Font-size accessibility scale */
+.fs-lg  { --fs-xs:14px;--fs-sm:15px;--fs-md:17px;--fs-lg:19px;--fs-xl:22px;--fs-2xl:28px;--fs-3xl:38px; }
+.fs-xl  { --fs-xs:15px;--fs-sm:17px;--fs-md:19px;--fs-lg:22px;--fs-xl:26px;--fs-2xl:32px;--fs-3xl:44px; }
+.fs-xxl { --fs-xs:17px;--fs-sm:19px;--fs-md:22px;--fs-lg:25px;--fs-xl:30px;--fs-2xl:38px;--fs-3xl:52px; }
+
+/* ─── Base ─────────────────────────────────────────────── */
+.rc {
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--paper);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.005em;
+}
+.rc *, .rc *::before, .rc *::after { box-sizing: border-box; }
+
+.rc h1, .rc h2, .rc h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -0.02em; line-height: 1.15; margin: 0; color: var(--ink); }
+.rc h1 { font-size: var(--fs-3xl); font-variation-settings: "SOFT" 50, "opsz" 48; }
+.rc h2 { font-size: var(--fs-2xl); font-variation-settings: "SOFT" 40, "opsz" 36; }
+.rc h3 { font-size: var(--fs-xl); font-variation-settings: "SOFT" 30, "opsz" 24; }
+.rc .eyebrow {
+  font-family: var(--sans); font-size: var(--fs-xs); font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-3);
+}
+
+/* ─── Watercolor backdrop — layered radial washes + subtle grain ─── */
+.wc-paper {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(ellipse 60% 40% at 10% 0%,  color-mix(in oklch, var(--rose-wash) 60%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 90% 20%, color-mix(in oklch, var(--sky-wash) 55%, transparent)  0%, transparent 60%),
+    radial-gradient(ellipse 70% 45% at 30% 100%,color-mix(in oklch, var(--sage-wash) 55%, transparent) 0%, transparent 60%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.28  0 0 0 0 0.20  0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: auto, auto, auto, 160px 160px;
+}
+
+/* ─── Cards & surfaces ─────────────────────────────── */
+.rc-card {
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 20px;
+}
+.rc-card-wash {
+  position: relative;
+  background: var(--paper);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+.rc-card-wash::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 0% 0%, color-mix(in oklch, var(--rose-wash) 80%, transparent) 0%, transparent 70%),
+    radial-gradient(ellipse 70% 50% at 100% 100%, color-mix(in oklch, var(--sage-wash) 70%, transparent) 0%, transparent 70%);
+  pointer-events: none;
+}
+.rc-card-wash > * { position: relative; }
+
+/* ─── Buttons ─────────────────────────────── */
+.rc-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--sans); font-size: var(--fs-md); font-weight: 500;
+  padding: 11px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  min-height: 44px;
+  transition: background .12s, border-color .12s, transform .06s;
+}
+.rc-btn:hover { background: var(--paper-2); }
+.rc-btn:active { transform: translateY(1px); }
+.rc-btn-primary {
+  background: var(--ink); color: var(--paper); border-color: var(--ink);
+}
+.rc-btn-primary:hover { background: color-mix(in oklch, var(--ink) 88%, transparent); }
+.rc-btn-soft {
+  background: var(--sage-wash); color: var(--sage-ink); border-color: transparent;
+}
+.rc-btn-ghost { background: transparent; border-color: transparent; }
+
+/* ─── Chips, badges ─────────────────────────────── */
+.rc-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--fs-xs); font-weight: 500;
+  padding: 4px 10px; border-radius: 999px;
+  background: var(--paper-2); color: var(--ink-2);
+  border: 1px solid var(--hairline);
+}
+.rc-chip.sage  { background: var(--sage-wash);  color: var(--sage-ink);  border-color: transparent; }
+.rc-chip.rose  { background: var(--rose-wash);  color: var(--rose-ink);  border-color: transparent; }
+.rc-chip.ochre { background: var(--ochre-wash); color: var(--ochre-ink); border-color: transparent; }
+.rc-chip.terra { background: var(--terra-wash); color: var(--terra-ink); border-color: transparent; }
+.rc-chip.sky   { background: var(--sky-wash);   color: var(--sky-ink);   border-color: transparent; }
+
+.rc-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background: var(--ink-3); }
+.rc-dot.sage  { background: var(--sage); }
+.rc-dot.rose  { background: var(--rose); }
+.rc-dot.ochre { background: var(--ochre); }
+.rc-dot.terra { background: var(--terra); }
+.rc-dot.live::after {
+  content:""; position:absolute; inset:-4px; border-radius:50%;
+  border: 2px solid currentColor; opacity: 0.3;
+  animation: rc-pulse 1.8s infinite;
+}
+@keyframes rc-pulse {
+  0% { transform: scale(0.9); opacity: 0.5; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* ─── Form controls ─────────────────────────────── */
+.rc-input {
+  width: 100%;
+  font-family: var(--sans); font-size: var(--fs-md);
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--hairline);
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 44px;
+}
+.rc-input:focus { outline: 2px solid var(--sage); outline-offset: 1px; }
+
+.rc-switch {
+  position: relative; width: 48px; height: 28px; border-radius: 999px;
+  background: var(--paper-3); cursor: pointer; transition: background .15s;
+  flex-shrink: 0;
+}
+.rc-switch::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px;
+  border-radius: 50%; background: var(--paper); box-shadow: 0 1px 3px rgba(0,0,0,.15);
+  transition: transform .18s cubic-bezier(.3,.8,.4,1);
+}
+.rc-switch.on { background: var(--sage); }
+.rc-switch.on::after { transform: translateX(20px); }
+
+/* ─── Status bar (mobile) ─────────────────────────────── */
+.rc-statusbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px 6px;
+  font-family: var(--sans); font-size: 15px; font-weight: 600;
+  color: var(--ink);
+}
+
+/* ─── Nav ─────────────────────────────── */
+.rc-tabbar {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  padding: 8px 8px 22px;
+  background: color-mix(in oklch, var(--paper) 80%, transparent);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--hairline);
+}
+.rc-tabbar button {
+  border: none; background: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 8px 4px; color: var(--ink-3);
+  font-family: var(--sans); font-size: 11px; font-weight: 500;
+  min-height: 44px;
+}
+.rc-tabbar button.active { color: var(--ink); }
+.rc-tabbar button .rc-ico { width: 22px; height: 22px; }
+
+/* Utility */
+.rc-row { display: flex; align-items: center; gap: 12px; }
+.rc-between { justify-content: space-between; }
+.rc-stack > * + * { margin-top: var(--gap, 12px); }
+.rc-divider { height: 1px; background: var(--hairline); border: 0; margin: 16px 0; }
+
+/* Ink-drawn decorative underline */
+.rc-underline {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='8' viewBox='0 0 120 8'><path d='M2 5 Q 30 1, 60 4 T 118 3' stroke='%23a8776a' stroke-width='1.4' fill='none' stroke-linecap='round' opacity='0.55'/></svg>");
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  padding-bottom: 8px;
+}

@@ -1,0 +1,53 @@
+[Unit]
+Description=Reachy Care — conv_app_v2 (LLM voice, IPC :8766)
+After=reachy-care-aec.service reachy-mini-daemon.service
+Wants=reachy-care-aec.service reachy-mini-daemon.service
+
+[Service]
+Type=simple
+User=pollen
+Group=pollen
+WorkingDirectory=/home/pollen/reachy_care
+EnvironmentFile=-/home/pollen/reachy_care/.env
+Environment="GST_PLUGIN_PATH=/opt/gst-plugins-rs/lib/aarch64-linux-gnu/gstreamer-1.0"
+Environment="PYTHONPATH=/home/pollen/reachy_care:/home/pollen/reachy_care/conv_app_v2:/home/pollen/reachy_care/tools_for_conv_app"
+Environment="CONV_DISABLE_ECHO_CANCEL=1"
+Environment="REACHY_CARE_PATH=/home/pollen/reachy_care"
+Environment="REACHY_MINI_CUSTOM_PROFILE=reachy_care"
+Environment="REACHY_MINI_EXTERNAL_PROFILES_DIRECTORY=/home/pollen/reachy_care/external_profiles"
+Environment="REACHY_MINI_EXTERNAL_TOOLS_DIRECTORY=/home/pollen/reachy_care/tools_for_conv_app"
+Environment="AUTOLOAD_EXTERNAL_TOOLS=true"
+# Kill-switch gate DOA : tant que la calibration angle/energy n'est pas stable en
+# conditions réelles, on ne filtre pas l'audio sur le DOA (reader tourne en observation).
+Environment="CONV_DISABLE_DOA_GATE=1"
+# Attendre que le daemon Pollen soit PLEINEMENT ready (backend_status.ready=True)
+# avant de lancer conv_app_v2. Sinon ReachyMini() échoue → headless mode → pas
+# de CameraWorker → tools camera + head tracking + body_yaw KO.
+# Polling max 30 s, toléré si fail (le conv retombera en headless, mieux que crash).
+# IMPORTANT : ce poll DOIT passer AVANT setup_asoundrc.sh — le daemon Pollen écrit
+# un ~/.asoundrc par défaut au démarrage ; si notre setup passe avant, le daemon
+# écrase ensuite et conv lit la version défaut sans nos alias reachymini_audio_sink
+# / mic_alert_in / conv_audio_in. Bug détecté  (heures perdues).
+ExecStartPre=/bin/bash -c 'for i in {1..30}; do ready=$(curl -s http://localhost:8000/api/daemon/status --max-time 2 | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get(\"backend_status\",{}).get(\"ready\",False))" 2>/dev/null); if [ "$ready" = "True" ]; then echo "daemon ready after ${i}s"; exit 0; fi; sleep 1; done; echo "daemon not ready after 30s — starting anyway"; exit 0'
+# Génère ~/.asoundrc avec détection dynamique de la carte USB externe (Anker
+# PowerConf S3, dongle USB-C DAC, ou autre), immunisé aux changements d'index
+# ALSA au boot. Remplace le cp statique depuis /etc/asound.conf.
+# DOIT tourner APRÈS le poll daemon ready (ci-dessus) pour que le daemon ait
+# déjà écrit sa version par défaut avant qu'on la remplace par la nôtre.
+# Sans ça, has_reachymini_asoundrc() du SDK retourne False, alsasink fallback
+# sur autoaudiosink → Card 0 (HP interne 5W muet ou Anker avec défauts).
+# Voir docs/journal/2026-04-23_refactor_gstreamer.md + docs/journal/2026-04-24_*.
+ExecStartPre=/bin/bash /home/pollen/reachy_care/resources/setup_asoundrc.sh
+ExecStart=/venvs/apps_venv/bin/python /home/pollen/reachy_care/conv_app_v2/main.py
+Restart=always
+RestartSec=5s
+# Kill proprement : SIGTERM + 15s pour cleanup, puis SIGKILL
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=15s
+# Logs : console + fichier existant (double stream, journalctl aussi utilisable)
+StandardOutput=append:/home/pollen/reachy_care/logs/conv_app.log
+StandardError=append:/home/pollen/reachy_care/logs/conv_app.log
+
+[Install]
+WantedBy=multi-user.target

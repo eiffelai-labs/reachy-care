@@ -1,0 +1,15 @@
+{
+  "name": "echecs",
+  "display_name": "Échecs",
+  "instructions_file": "instructions_echecs.txt",
+  "announce_message": "[Reachy Care] MODE ÉCHECS activé. Un échiquier est devant toi. Adopte le rôle de coach d'échecs bienveillant.",
+  "gates": {
+    "suppress_face_recognition": true,
+    "silent_face_recognition": false,
+    "suppress_cry_detection": true,
+    "suppress_fall_detection": false,
+    "head_pitch_deg": 15,
+    "wake_word_interrupts_reading": false
+  },
+  "tools": ["chess_move", "chess_reset"]
+}

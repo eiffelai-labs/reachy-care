@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reachy Care — Paramètres</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<nav class="settings-nav">
+    <a href="dashboard.html" class="back-link">
+        <span class="back-icon" data-icon="back"></span>
+        <span>Dashboard principal</span>
+    </a>
+    <span class="nav-sep">·</span>
+    <strong>Paramètres</strong>
+</nav>
+
+<div class="settings-wrap">
+
+<div class="settings-card">
+    <h3>Personnes connues</h3>
+    <p>Le badge <strong class="primary-badge">Primaire</strong> indique la personne que Reachy reconnaît en priorité. Actions par personne : définir primaire, ré-enrôler visage ou voix, oublier.</p>
+    <div id="persons-list">
+        <p class="placeholder" style="text-align:left; padding:6px 0;">Chargement...</p>
+    </div>
+
+    <hr class="settings-sep" />
+    <h4>Enrôler une nouvelle personne</h4>
+    <div class="settings-form">
+        <label>Prénom (minuscules, sans accent)</label>
+        <input id="newPersonName" placeholder="ex: marie" />
+        <button class="btn-settings" onclick="enrollNew()">Enrôler (visage)</button>
+    </div>
+    <div id="msg-persons" class="msg"></div>
+</div>
+
+<div class="settings-card">
+    <h3>Localisation</h3>
+    <p>Ville utilisée par la météo et dans les instructions du LLM.</p>
+    <div class="settings-form">
+        <label>Ville (ex : "Ville, Code postal, Région")</label>
+        <input id="locationCity" />
+        <label>Fuseau horaire IANA (ex: Europe/Paris)</label>
+        <input id="locationTz" />
+        <button class="btn-settings" onclick="saveLocation()">Enregistrer</button>
+    </div>
+    <div id="msg-location" class="msg"></div>
+</div>
+
+<div class="settings-card">
+    <h3>Wifi</h3>
+    <p>Reseau internet auquel Reachy est connecte. Change selon le lieu (bureau, demo investisseurs, domicile).</p>
+
+    <div class="wifi-current">
+        <div class="wifi-current-label">
+            <span class="wifi-big-icon" id="wifi-current-icon" data-icon="wifi"></span>
+            <div class="wifi-current-text">
+                <span class="wifi-current-ssid" id="wifi-current-ssid">Galaad-Main</span>
+                <span class="wifi-current-meta" id="wifi-current-meta">Connecte · -52 dBm · 192.168.x.x</span>
+            </div>
+        </div>
+        <button class="btn-settings btn-danger" onclick="wifiForget()" id="btn-wifi-forget">Oublier</button>
+    </div>
+
+    <h4 style="margin-top:18px;">Reseaux disponibles</h4>
+    <div class="settings-row settings-row-tight">
+        <button class="btn-settings" onclick="wifiScan()" id="btn-wifi-scan">Rescanner</button>
+        <small class="settings-hint">Le scan prend quelques secondes.</small>
+    </div>
+    <div class="wifi-scan-list" id="wifi-scan-list">
+        <p class="placeholder" style="text-align:left; padding:6px 0;">Chargement...</p>
+    </div>
+
+    <h4 style="margin-top:18px;">Connexion manuelle</h4>
+    <p>Si le reseau est cache ou n'apparait pas dans la liste.</p>
+    <div class="settings-form">
+        <label>SSID</label>
+        <input id="wifiManualSsid" placeholder="Nom du reseau" />
+        <label>Mot de passe</label>
+        <input id="wifiManualPwd" type="password" placeholder="Laisser vide si reseau ouvert" />
+        <button class="btn-settings btn-accent" onclick="wifiConnectManual()">Connecter</button>
+    </div>
+
+    <h4 style="margin-top:18px;">Hotspot de secours</h4>
+    <p>Si aucun wifi n'est disponible, Reachy cree son propre point d'acces "Reachy-XXXX". Connecter l'iPhone ou l'ordi dessus pour reconfigurer le wifi sans ecran externe.</p>
+    <div class="settings-row">
+        <button class="btn-settings" onclick="wifiHotspot()">Activer le hotspot</button>
+        <small class="settings-hint">Reachy sortira d'Internet le temps de la reconfiguration.</small>
+    </div>
+
+    <div id="msg-wifi" class="msg"></div>
+</div>
+
+<div class="settings-card">
+    <h3>Alerte Telegram (recommandée)</h3>
+    <p>Bot token (obtenu via @BotFather) + chat_id du destinataire. Plus simple que l'email.</p>
+    <div class="settings-form">
+        <label>Bot Token</label>
+        <input id="telegramToken" type="password" placeholder="123456:ABC-DEF..." />
+        <label>Chat ID</label>
+        <input id="telegramChat" placeholder="ex: 123456789" />
+        <label class="inline-check"><input id="telegramEnabled" type="checkbox" /> Activer Telegram</label>
+        <button class="btn-settings" onclick="saveTelegram()">Enregistrer</button>
+    </div>
+    <div id="msg-telegram" class="msg"></div>
+</div>
+
+<div class="settings-card">
+    <h3>Alerte email (alternatif)</h3>
+    <p>Gmail avec mot de passe d'application. Utilisé si Telegram non configuré.</p>
+    <div class="settings-form">
+        <label>Destinataire</label>
+        <input id="emailTo" type="email" />
+        <label>Expéditeur</label>
+        <input id="emailFrom" type="email" />
+        <label>Mot de passe d'application Gmail</label>
+        <input id="emailPwd" type="password" />
+        <label class="inline-check"><input id="emailEnabled" type="checkbox" /> Activer email</label>
+        <button class="btn-settings" onclick="saveEmail()">Enregistrer</button>
+    </div>
+    <div id="msg-email" class="msg"></div>
+</div>
+
+<div class="settings-card">
+    <h3>Clés API (verrouillé)</h3>
+    <div class="info-banner">
+        Verrouillé pour la démo Art 51 (28/04/2026). Clés gérées dans <code>config_local.py</code> sur le Pi. Pour modifier en prod, éditer <code>/home/pollen/reachy_care/config_local.py</code> puis redémarrer main.
+    </div>
+    <div class="settings-form">
+        <label>Audd API Token</label>
+        <input id="auddToken" type="password" disabled placeholder="verrouillé" />
+        <small class="settings-hint">Permet à Reachy d'identifier une chanson entendue. 500 identifications/mois gratuites sur audd.io.</small>
+
+        <label>Brave Search API Key</label>
+        <input id="braveKey" type="password" disabled placeholder="verrouillé" />
+        <small class="settings-hint">Utilisée par le tool <code>search</code>. Lue en priorité depuis <code>config.BRAVE_API_KEY</code> surchargé par <code>config_local.py</code>.</small>
+
+        <button class="btn-settings" disabled>Verrouillé</button>
+    </div>
+    <div id="msg-apikeys" class="msg"></div>
+</div>
+
+<div class="settings-card">
+    <h3>Contrôles rapides</h3>
+    <p>Commandes directes au robot.</p>
+    <div class="settings-row">
+        <button class="btn-settings" onclick="sendCmd({cmd:'wake'})">Réveiller</button>
+        <button class="btn-settings btn-danger" onclick="sendCmd({cmd:'sleep'})">Endormir</button>
+    </div>
+
+    <label class="settings-label">Wake word</label>
+    <div class="settings-row settings-row-tight">
+        <select id="wake-word-select" class="settings-select">
+            <option value="">Chargement…</option>
+        </select>
+        <button class="btn-settings btn-play" onclick="triggerSelectedWakeWord()"
+            title="Écouter un extrait et déclencher le wake word sur le robot"
+            data-icon="play"></button>
+    </div>
+    <small class="settings-hint">Le ▶ joue l'extrait audio (si disponible) et déclenche le wake word à distance sur le robot.</small>
+
+    <label class="settings-label">Seuil de détection (0.20 très permissif, 0.80 strict)</label>
+    <div class="settings-row settings-row-tight">
+        <input type="range" id="wake-word-threshold" min="0.20" max="0.80" step="0.05" value="0.35"
+            oninput="document.getElementById('wake-word-threshold-value').textContent = Number(this.value).toFixed(2)"
+            class="settings-slider">
+        <span id="wake-word-threshold-value" class="settings-readout">0.35</span>
+    </div>
+
+    <div class="settings-row">
+        <button class="btn-settings btn-accent" id="btn-apply-wake-word" onclick="applyWakeWord()">Appliquer et redémarrer</button>
+        <small class="settings-hint">Redémarre main.py pour charger le nouveau modèle.</small>
+    </div>
+    <div id="msg-controls" class="msg"></div>
+</div>
+
+<div class="settings-card">
+    <h3 class="settings-card-warn">⚠️ Après modification</h3>
+    <p>Les modifications de <code>config_local.py</code> (localisation, Telegram, email, clés API) nécessitent <strong>un redémarrage de Reachy Care</strong> pour prendre effet.</p>
+    <button class="btn-settings btn-danger" onclick="if(confirm('Redémarrer le service main ?')) sendCmd({cmd:'restart_main'})">Redémarrer main.py</button>
+</div>
+
+</div>
+
+<script src="/static/config.js"></script>
+<script src="/static/components/icons.js"></script>
+<script>
+    // Hydrate icons (back arrow, play button) before the page scripts wire up.
+    (function hydrate() {
+        if (!window.Icons) return;
+        document.querySelectorAll('[data-icon]').forEach(el => {
+            const name = el.dataset.icon;
+            if (name && Icons.has(name)) {
+                el.replaceChildren(Icons.svg(name, 18));
+            }
+        });
+    })();
+</script>
+<script>
+async function sendCmd(payload) {
+    const name = payload.name;
+    if ((payload.cmd === 'enroll' || payload.cmd === 'reenroll_voice' || payload.cmd === 'forget') && !name) {
+        showMsg('persons', 'Entre un nom.', 'err');
+        return;
+    }
+    try {
+        const r = await fetch('/api/cmd', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload),
+        });
+        const j = await r.json();
+        if (j.ok) {
+            showMsg('persons', 'Commande envoyée : ' + payload.cmd + (name ? ' (' + name + ')' : ''), 'ok');
+            if (['enroll', 'forget'].includes(payload.cmd)) {
+                setTimeout(loadPersons, 800);
+            }
+        } else {
+            showMsg('persons', j.error || 'Erreur', 'err');
+        }
+    } catch (e) { showMsg('persons', 'Erreur réseau : ' + e.message, 'err'); }
+}
+
+function _mkBtn(label, cls, handler) {
+    const b = document.createElement('button');
+    b.className = cls;
+    b.textContent = label;
+    b.addEventListener('click', handler);
+    return b;
+}
+
+function _mkLabelInput(labelText, id, value) {
+    const wrap = document.createElement('div');
+    const l = document.createElement('label');
+    l.textContent = labelText;
+    const i = document.createElement('input');
+    i.id = id;
+    i.type = 'text';
+    i.value = value || '';
+    wrap.appendChild(l);
+    wrap.appendChild(i);
+    return wrap;
+}
+
+function renderPerson(p) {
+    const row = document.createElement('div');
+    row.className = 'person-row' + (p.is_owner ? ' is-primary' : '');
+    row.dataset.name = p.name;
+
+    const header = document.createElement('div');
+    header.className = 'person-header';
+    header.addEventListener('click', (e) => {
+        if (e.target.closest('.primary-check')) return;
+        togglePersonBody(row);
+    });
+
+    const primaryLabel = document.createElement('label');
+    primaryLabel.className = 'primary-check';
+    primaryLabel.title = p.is_owner ? 'Personne primaire — décoche une autre case pour changer' : 'Cocher pour définir comme primaire';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = p.is_owner;
+    cb.disabled = p.is_owner;
+    cb.addEventListener('click', (e) => e.stopPropagation());
+    cb.addEventListener('change', () => {
+        if (cb.checked && !p.is_owner) setPrimary(p.name);
+    });
+    const cbText = document.createElement('span');
+    cbText.textContent = 'Primaire';
+    primaryLabel.appendChild(cb);
+    primaryLabel.appendChild(cbText);
+
+    const nameEl = document.createElement('strong');
+    nameEl.className = 'person-name';
+    nameEl.textContent = p.display_name;
+
+    const meta = document.createElement('span');
+    meta.className = 'person-meta';
+    const date = p.enrolled_at ? new Date(p.enrolled_at).toLocaleDateString('fr-FR', {day:'2-digit', month:'short'}) : '—';
+    meta.textContent = date + ' · ' + p.n_photos + ' photo' + (p.n_photos > 1 ? 's' : '');
+
+    const chevron = document.createElement('span');
+    chevron.className = 'chevron';
+    chevron.textContent = '▸';
+
+    header.appendChild(primaryLabel);
+    header.appendChild(nameEl);
+    header.appendChild(meta);
+    header.appendChild(chevron);
+
+    const body = document.createElement('div');
+    body.className = 'person-body';
+    body.style.display = 'none';
+    body.dataset.loaded = 'false';
+
+    row.appendChild(header);
+    row.appendChild(body);
+    return row;
+}
+
+function togglePersonBody(row) {
+    const body = row.querySelector('.person-body');
+    const chevron = row.querySelector('.chevron');
+    if (body.style.display === 'none') {
+        body.style.display = 'block';
+        chevron.classList.add('expanded');
+        if (body.dataset.loaded === 'false') {
+            fillPersonBody(row.dataset.name, body);
+        }
+    } else {
+        body.style.display = 'none';
+        chevron.classList.remove('expanded');
+    }
+}
+
+async function fillPersonBody(name, body) {
+    body.dataset.loaded = 'true';
+    _clearNode(body);
+    const loading = document.createElement('p');
+    loading.className = 'placeholder';
+    loading.style.textAlign = 'left';
+    loading.style.padding = '6px 0';
+    loading.textContent = 'Chargement du profil…';
+    body.appendChild(loading);
+    let profile = {medications: [], schedules: [], emergency_contact: '', notes: ''};
+    try {
+        const r = await fetch('/api/persons/' + encodeURIComponent(name) + '/profile');
+        const j = await r.json();
+        if (!j.error) profile = j;
+    } catch (e) {
+        // on continue avec profil vide
+    }
+    _clearNode(body);
+    const form = document.createElement('div');
+    form.className = 'settings-form';
+    form.appendChild(_mkLabelInput('Médicaments (séparés par virgule)', 'meds_' + name, (profile.medications || []).join(', ')));
+    form.appendChild(_mkLabelInput('Horaires (séparés par virgule)', 'sched_' + name, (profile.schedules || []).join(', ')));
+    form.appendChild(_mkLabelInput('Contact urgence', 'emerg_' + name, profile.emergency_contact || ''));
+    form.appendChild(_mkLabelInput('Notes libres', 'notes_' + name, profile.notes || ''));
+
+    const actions = document.createElement('div');
+    actions.className = 'person-actions';
+    actions.appendChild(_mkBtn('Enregistrer profil', 'btn-settings', () => saveProfileInline(name)));
+    actions.appendChild(_mkBtn('Ré-enrôler visage', 'btn-settings', () => sendCmd({cmd:'enroll', name:name})));
+    actions.appendChild(_mkBtn('Ré-enrôler voix', 'btn-settings', () => sendCmd({cmd:'reenroll_voice', name:name})));
+    const forgetBtn = _mkBtn('Oublier', 'btn-settings btn-danger', () => {
+        if (confirm('Oublier ' + name + ' ?')) sendCmd({cmd:'forget', name:name});
+    });
+    actions.appendChild(forgetBtn);
+
+    body.appendChild(form);
+    body.appendChild(actions);
+}
+
+function _clearNode(el) {
+    while (el.firstChild) el.removeChild(el.firstChild);
+}
+
+function _setMessage(container, text, cls) {
+    _clearNode(container);
+    const p = document.createElement('p');
+    p.className = 'placeholder';
+    p.style.textAlign = 'left';
+    p.style.padding = '6px 0';
+    if (cls === 'err') p.style.color = 'var(--terra-ink)';
+    p.textContent = text;
+    container.appendChild(p);
+}
+
+async function loadPersons() {
+    const container = document.getElementById('persons-list');
+    if (!container) return;
+    try {
+        const r = await fetch('/api/persons');
+        const j = await r.json();
+        if (j.error) { _setMessage(container, 'Erreur : ' + j.error, 'err'); return; }
+        if (!j.persons || j.persons.length === 0) {
+            _setMessage(container, 'Aucune personne enrôlée.', 'muted');
+            return;
+        }
+        _clearNode(container);
+        j.persons.forEach(person => container.appendChild(renderPerson(person)));
+    } catch (e) {
+        _setMessage(container, 'Erreur réseau : ' + e.message, 'err');
+    }
+}
+
+async function setPrimary(name) {
+    try {
+        const r = await fetch('/api/persons/' + encodeURIComponent(name) + '/primary', { method: 'POST' });
+        const j = await r.json();
+        if (j.ok) {
+            showMsg('persons', 'Primaire = ' + name + '. Redémarre main.py pour appliquer.', 'ok');
+            loadPersons();
+        } else {
+            showMsg('persons', j.error || 'Erreur', 'err');
+        }
+    } catch (e) {
+        showMsg('persons', 'Erreur réseau : ' + e.message, 'err');
+    }
+}
+
+function enrollNew() {
+    const name = (document.getElementById('newPersonName').value || '').trim().toLowerCase();
+    if (!name) { showMsg('persons', 'Prénom obligatoire', 'err'); return; }
+    sendCmd({cmd: 'enroll', name: name});
+}
+
+async function saveSettings(path, payload, msgId) {
+    try {
+        const r = await fetch(path, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload),
+        });
+        const j = await r.json();
+        if (j.ok) showMsg(msgId, 'Enregistré. Redémarre main.py pour appliquer.', 'ok');
+        else showMsg(msgId, j.error || 'Erreur', 'err');
+    } catch (e) { showMsg(msgId, 'Erreur réseau : ' + e.message, 'err'); }
+}
+
+async function saveProfileInline(name) {
+    const meds = (document.getElementById('meds_' + name)?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+    const sched = (document.getElementById('sched_' + name)?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+    const emerg = (document.getElementById('emerg_' + name)?.value || '').trim();
+    const notes = (document.getElementById('notes_' + name)?.value || '').trim();
+    const payload = { name, medications: meds, schedules: sched, emergency_contact: emerg, notes };
+    try {
+        const r = await fetch('/api/settings/profile', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload),
+        });
+        const j = await r.json();
+        if (j.ok) showMsg('persons', 'Profil de ' + name + ' enregistré', 'ok');
+        else showMsg('persons', j.error || 'Erreur', 'err');
+    } catch (e) {
+        showMsg('persons', 'Erreur réseau : ' + e.message, 'err');
+    }
+}
+
+function saveLocation() {
+    saveSettings('/api/settings/location', {
+        location: document.getElementById('locationCity').value.trim(),
+        timezone: document.getElementById('locationTz').value.trim(),
+    }, 'location');
+}
+
+function saveTelegram() {
+    saveSettings('/api/settings/telegram', {
+        token: document.getElementById('telegramToken').value.trim(),
+        chat_id: document.getElementById('telegramChat').value.trim(),
+        enabled: document.getElementById('telegramEnabled').checked,
+    }, 'telegram');
+}
+
+function saveEmail() {
+    saveSettings('/api/settings/email', {
+        to: document.getElementById('emailTo').value.trim(),
+        from: document.getElementById('emailFrom').value.trim(),
+        password: document.getElementById('emailPwd').value,
+        enabled: document.getElementById('emailEnabled').checked,
+    }, 'email');
+}
+
+function saveApiKeys() {
+    saveSettings('/api/settings/apikeys', {
+        audd: document.getElementById('auddToken').value.trim(),
+        brave: document.getElementById('braveKey').value.trim(),
+    }, 'apikeys');
+}
+
+function showMsg(id, text, cls) {
+    const el = document.getElementById('msg-' + id);
+    if (!el) return;
+    el.textContent = text;
+    el.className = 'msg ' + cls;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+// --- Wifi (backend nmcli via /api/wifi/* câblés 22/04 après R12 Supervisor) ---
+
+function renderWifiScan(list) {
+    const container = document.getElementById('wifi-scan-list');
+    if (!container) return;
+    _clearNode(container);
+    if (!list.length) {
+        _setMessage(container, 'Aucun reseau detecte.', 'muted');
+        return;
+    }
+    list.forEach(net => {
+        const row = document.createElement('div');
+        row.className = 'wifi-scan-item' + (net.saved ? ' is-saved' : '');
+
+        const ssid = document.createElement('span');
+        ssid.className = 'wifi-scan-ssid';
+        ssid.textContent = net.ssid;
+
+        const rssi = document.createElement('span');
+        rssi.className = 'wifi-scan-rssi';
+        rssi.textContent = (net.rssi ?? '?') + ' dBm';
+
+        const btn = document.createElement('button');
+        btn.className = 'btn-settings btn-wifi-connect';
+        if (net.active) {
+            btn.textContent = 'Connecte';
+            btn.disabled = true;
+        } else {
+            btn.textContent = net.saved ? 'Connecter' : 'Connecter…';
+            btn.addEventListener('click', () => wifiConnect(net.ssid, !net.saved && net.security && net.security !== 'open'));
+        }
+
+        row.appendChild(ssid);
+        row.appendChild(rssi);
+        row.appendChild(btn);
+        container.appendChild(row);
+    });
+}
+
+async function wifiRefreshStatus() {
+    try {
+        const r = await fetch('/api/wifi/status');
+        const j = await r.json();
+        if (!j.ok) return;
+        const ssid = document.getElementById('wifi-current-ssid');
+        const meta = document.getElementById('wifi-current-meta');
+        if (ssid) ssid.textContent = j.ssid || '—';
+        if (meta) {
+            const parts = [];
+            parts.push(j.ssid ? 'Connecte' : 'Deconnecte');
+            if (j.rssi_dbm != null) parts.push(j.rssi_dbm + ' dBm');
+            if (j.ipv4) parts.push(j.ipv4);
+            if (j.hotspot_active) parts.push('HOTSPOT');
+            meta.textContent = parts.join(' · ');
+        }
+    } catch (e) { /* silencieux */ }
+}
+
+async function wifiScan() {
+    const btn = document.getElementById('btn-wifi-scan');
+    if (btn) btn.disabled = true;
+    try {
+        const r = await fetch('/api/wifi/scan');
+        const j = await r.json();
+        if (!j.ok) throw new Error(j.error || 'Scan failed');
+        const list = j.networks || [];
+        renderWifiScan(list);
+        showMsg('wifi', list.length + ' reseaux detectes.', 'ok');
+    } catch (e) {
+        showMsg('wifi', 'Erreur scan : ' + e.message, 'err');
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+async function wifiConnect(ssid, askPassword) {
+    let password = '';
+    if (askPassword) {
+        password = prompt('Mot de passe pour ' + ssid + ' :');
+        if (password === null) return;
+    }
+    showMsg('wifi', 'Connexion a ' + ssid + '…', 'ok');
+    try {
+        const r = await fetch('/api/wifi/connect', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ssid, password}),
+        });
+        const j = await r.json();
+        if (!j.ok) { showMsg('wifi', j.error || 'Erreur', 'err'); return; }
+        showMsg('wifi', 'Connecte a ' + ssid, 'ok');
+        wifiRefreshStatus();
+        wifiScan();
+    } catch (e) {
+        showMsg('wifi', 'Erreur reseau : ' + e.message, 'err');
+    }
+}
+
+function wifiConnectManual() {
+    const ssid = (document.getElementById('wifiManualSsid').value || '').trim();
+    const pwd = document.getElementById('wifiManualPwd').value;
+    if (!ssid) { showMsg('wifi', 'SSID obligatoire', 'err'); return; }
+    wifiConnect(ssid, false);
+}
+
+async function wifiForget() {
+    const ssid = document.getElementById('wifi-current-ssid')?.textContent || '';
+    if (!ssid || ssid === '—') { showMsg('wifi', 'Aucun reseau courant', 'err'); return; }
+    if (!confirm('Oublier ' + ssid + ' ? Reachy ne se reconnectera plus automatiquement.')) return;
+    try {
+        const r = await fetch('/api/wifi/forget', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ssid}),
+        });
+        const j = await r.json();
+        if (!j.ok) { showMsg('wifi', j.error || 'Erreur', 'err'); return; }
+        showMsg('wifi', 'Reseau ' + ssid + ' oublie', 'ok');
+        wifiRefreshStatus();
+        wifiScan();
+    } catch (e) {
+        showMsg('wifi', 'Erreur reseau : ' + e.message, 'err');
+    }
+}
+
+async function wifiHotspot() {
+    if (!confirm('Activer le hotspot ? Reachy quittera le wifi actuel. Tu perdras temporairement la connexion au dashboard.')) return;
+    try {
+        const r = await fetch('/api/wifi/hotspot', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({}),
+        });
+        const j = await r.json();
+        if (!j.ok) { showMsg('wifi', j.error || 'Erreur', 'err'); return; }
+        showMsg('wifi', 'Hotspot "' + j.ssid + '" actif · mdp : ' + j.password, 'ok');
+    } catch (e) {
+        showMsg('wifi', 'Erreur reseau : ' + e.message, 'err');
+    }
+}
+
+wifiRefreshStatus();
+setTimeout(wifiScan, 300);
+
+async function loadWakeWordsSelect() {
+    const sel = document.getElementById('wake-word-select');
+    if (!sel) return;
+    try {
+        const r = await fetch('/api/wake_words');
+        const j = await r.json();
+        while (sel.firstChild) sel.removeChild(sel.firstChild);
+        if (!j.wake_words || j.wake_words.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = 'Aucun wake word détecté';
+            sel.appendChild(opt);
+            return;
+        }
+        j.wake_words.forEach(w => {
+            const opt = document.createElement('option');
+            opt.value = w.name + '|' + w.source;
+            opt.textContent = w.display_name + ' · ' + w.source + (w.has_sample ? '' : ' · sans extrait');
+            if (w.sample_url) opt.dataset.sampleUrl = w.sample_url;
+            opt.dataset.hasSample = w.has_sample ? '1' : '0';
+            if (w.is_current) opt.selected = true;
+            sel.appendChild(opt);
+        });
+    } catch (e) {
+        while (sel.firstChild) sel.removeChild(sel.firstChild);
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Erreur chargement';
+        sel.appendChild(opt);
+    }
+}
+
+function triggerSelectedWakeWord() {
+    const sel = document.getElementById('wake-word-select');
+    if (!sel || !sel.value) { showMsg('controls', 'Aucun wake word sélectionné', 'err'); return; }
+    const opt = sel.options[sel.selectedIndex];
+    const parts = sel.value.split('|');
+    const name = parts[0];
+
+    if (opt.dataset.hasSample === '1' && opt.dataset.sampleUrl) {
+        try {
+            new Audio(opt.dataset.sampleUrl).play().catch(() => {});
+        } catch (e) { /* silencieux */ }
+    }
+
+    fetch('/api/cmd', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({cmd: 'wake_word_test', model: name}),
+    })
+    .then(r => r.json())
+    .then(j => {
+        if (j.ok) showMsg('controls', 'Wake word "' + name + '" déclenché — antennes + ouverture conversation.', 'ok');
+        else showMsg('controls', j.error || 'Erreur', 'err');
+    })
+    .catch(e => showMsg('controls', 'Erreur réseau : ' + e.message, 'err'));
+}
+
+async function applyWakeWord() {
+    const sel = document.getElementById('wake-word-select');
+    const slider = document.getElementById('wake-word-threshold');
+    const btn = document.getElementById('btn-apply-wake-word');
+    if (!sel || !sel.value) { showMsg('controls', 'Aucun wake word sélectionné', 'err'); return; }
+    const [name, source] = sel.value.split('|');
+    const threshold = Number(slider.value);
+
+    btn.disabled = true;
+    try {
+        const r = await fetch('/api/settings/wake_word', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name, source, threshold}),
+        });
+        const j = await r.json();
+        if (j.error) { showMsg('controls', j.error, 'err'); return; }
+
+        showMsg('controls', 'Config écrite. Redémarrage de main.py...', 'ok');
+        await fetch('/api/cmd', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({cmd: 'restart_main'}),
+        });
+        showMsg('controls', 'Redémarrage demandé. Le dashboard reviendra dans ~10s.', 'ok');
+    } catch (e) {
+        showMsg('controls', 'Erreur réseau : ' + e.message, 'err');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+document.querySelectorAll('.settings-card').forEach((card, idx) => {
+    const h3 = card.querySelector('h3');
+    if (!h3) return;
+    if (idx > 0) card.classList.add('collapsed');
+    h3.addEventListener('click', () => card.classList.toggle('collapsed'));
+});
+
+loadPersons();
+loadWakeWordsSelect();
+
+fetch('/api/settings').then(r=>r.json()).then(s => {
+    if (s.location) document.getElementById('locationCity').value = s.location;
+    if (s.timezone) document.getElementById('locationTz').value = s.timezone;
+    if (s.telegram_enabled) document.getElementById('telegramEnabled').checked = true;
+    if (s.telegram_chat_id) document.getElementById('telegramChat').value = s.telegram_chat_id;
+    if (s.email_to) document.getElementById('emailTo').value = s.email_to;
+    if (s.email_from) document.getElementById('emailFrom').value = s.email_from;
+    if (s.email_enabled) document.getElementById('emailEnabled').checked = true;
+    if (typeof s.wake_word_threshold === 'number') {
+        const slider = document.getElementById('wake-word-threshold');
+        const readout = document.getElementById('wake-word-threshold-value');
+        if (slider) slider.value = s.wake_word_threshold;
+        if (readout) readout.textContent = Number(s.wake_word_threshold).toFixed(2);
+    }
+}).catch(()=>{});
+</script>
+</body>
+</html>

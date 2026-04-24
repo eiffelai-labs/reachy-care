@@ -1,0 +1,21 @@
+[Unit]
+Description=Reachy Care Conv App V2
+After=network-online.target reachy-mini-daemon.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pollen
+WorkingDirectory=/home/pollen/reachy_care/conv_app_v2
+ExecStart=/venvs/apps_venv/bin/python main.py
+# Restart=on-failure : ne relance que si exit != 0. Un SIGTERM (api_power_stop)
+# entraîne un engine.stop() → exit 0 → PAS de respawn. Indispensable pour
+# éviter la séquence couche/relève violente quand on arrête le robot.
+Restart=on-failure
+RestartSec=5
+Environment=REACHY_MINI_CUSTOM_PROFILE=reachy_care
+Environment=REACHY_MINI_EXTERNAL_PROFILES_DIRECTORY=/home/pollen/reachy_care/external_profiles
+Environment=REACHY_MINI_EXTERNAL_TOOLS_DIRECTORY=/home/pollen/reachy_care/tools_for_conv_app
+
+[Install]
+WantedBy=multi-user.target

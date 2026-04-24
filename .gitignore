@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Environnements
+.env
+.venv/
+venv/
+
+# Données persistantes Pi (ne pas versionner)
+known_faces/
+logs/
+models/
+
+# Documents Office
+*.docx
+*.xlsx
+*.pdf
+
+# Photos de test
+*.jpg
+*.jpeg
+*.png
+*.bmp
+
+# Fichiers temporaires
+/tmp/
+*.tmp
+*.bak
+
+# Docs internes — tout ce qui n'est pas le code de l'app
+.claude/
+BRIEF_*.md
+POUR_DEMAIN.md
+RAPPORT_*.md
+CORRECTIONS_DEV_*.md
+REPRISE_*.md
+DEPLOY_*.md
+TESTS_*.md
+BUG_*.md
+PLAN_*.md
+CONTEXT.md
+INSTRUCTIONS_CLAUDE_CODE.md
+QUESTIONS-COWORK.md
+CONFIGURATION.md
+ETAT_AVANCEMENT.md
+RESULTATS_TESTS.md
+ANALYSE_*.md
+ARCHITECTURE_*.md
+PROMPT_*.md
+VISITEUR_*.md
+DEPLOY.txt
+.DS_Store
+config_local.py
+
+# IDE
+.idea/
+.vscode/
+*.swp
+# Clone Pollen pour référence locale (MemPalace: reachy_care reuses_from)
+conv_app_v2/pollen_src/_external/
+
+# Sauvegardes Pi rapatriées (venvs, logs) — ne jamais tracker
+pi_backups/

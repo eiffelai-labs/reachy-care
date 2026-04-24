@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Reachy Care</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- ========== BOTTOM NAVIGATION ========== -->
+<nav id="navbar">
+    <a href="#control" class="nav-item active" data-page="control">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="12" x2="12" y2="8"/>
+            <circle cx="12" cy="12" r="1"/>
+        </svg>
+        <span>Controle</span>
+    </a>
+    <a href="#persons" class="nav-item" data-page="persons">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 21c0-4.418 3.582-7 8-7s8 2.582 8 7"/>
+        </svg>
+        <span>Personnes</span>
+    </a>
+    <a href="#settings" class="nav-item" data-page="settings">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1.08 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1.08z"/>
+        </svg>
+        <span>Settings</span>
+    </a>
+    <a href="#logs" class="nav-item" data-page="logs">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"/>
+            <line x1="12" y1="19" x2="20" y2="19"/>
+        </svg>
+        <span>Logs</span>
+    </a>
+</nav>
+
+<!-- ========== HEADER ========== -->
+<div id="header">
+    <div class="header-top">
+        <svg class="robot-avatar" viewBox="0 0 80 80" width="48" height="48">
+            <!-- Antennae -->
+            <line x1="30" y1="18" x2="30" y2="8" stroke="#888" stroke-width="2"/>
+            <circle cx="30" cy="6" r="3" fill="#4fc3f7"/>
+            <line x1="50" y1="18" x2="50" y2="8" stroke="#888" stroke-width="2"/>
+            <circle cx="50" cy="6" r="3" fill="#4fc3f7"/>
+            <!-- Head -->
+            <rect x="20" y="18" width="40" height="30" rx="8" fill="#37474f"/>
+            <!-- Eyes -->
+            <circle cx="33" cy="33" r="5" fill="#4fc3f7"/>
+            <circle cx="47" cy="33" r="5" fill="#4fc3f7"/>
+            <!-- Body -->
+            <rect x="25" y="50" width="30" height="20" rx="5" fill="#37474f"/>
+            <!-- Heart LED -->
+            <circle cx="40" cy="60" r="4" fill="#ef5350" class="heart-led"/>
+        </svg>
+        <div class="header-text">
+            <h1>Reachy Care</h1>
+            <div class="status-line">
+                <span id="status-dot" class="status-dot offline"></span>
+                <span id="status-label">Connexion...</span>
+                <span id="status-uptime"></span>
+            </div>
+        </div>
+        <div id="power-controls" class="power-controls"></div>
+    </div>
+</div>
+
+<!-- ========== PAGE: CONTROL ========== -->
+<div id="page-control" class="page active">
+
+    <!-- Operation banner -->
+    <div id="op-banner" class="op-banner hidden">
+        <div class="op-banner-head">
+            <div class="spinner"></div>
+            <span id="op-banner-text">Operation en cours...</span>
+        </div>
+        <pre id="op-banner-log" class="op-banner-log"></pre>
+    </div>
+
+    <!-- Camera -->
+    <div class="card">
+        <h2>Camera</h2>
+        <div class="video-container">
+            <img id="video-feed" src="" alt="Camera feed">
+            <div id="video-offline" class="video-offline">Camera hors ligne</div>
+        </div>
+    </div>
+
+    <!-- Modules -->
+    <div class="card">
+        <h2>Modules</h2>
+        <div id="modules-grid"></div>
+    </div>
+
+    <!-- Modes -->
+    <div class="card">
+        <h2>Modes</h2>
+        <div class="modes-grid">
+            <button class="mode-btn" data-mode="normal" onclick="switchMode('normal')">Normal</button>
+            <button class="mode-btn" data-mode="histoire" onclick="switchMode('histoire')">Histoires</button>
+            <button class="mode-btn" data-mode="echecs" onclick="switchMode('echecs')">Echecs</button>
+            <button class="mode-btn" data-mode="musique" onclick="switchMode('musique')">Musique</button>
+            <button class="mode-btn" data-mode="expose" onclick="promptProMode()">Expose</button>
+        </div>
+    </div>
+
+    <!-- Deploy -->
+    <div class="card">
+        <h2>Deploiement</h2>
+        <div class="deploy-buttons">
+            <button class="btn btn-deploy" onclick="deploy('quick')">Deployer (git pull)</button>
+            <button class="btn btn-deploy-full" onclick="deploy('full')">Deploy complet (+ pip)</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== PAGE: PERSONS ========== -->
+<div id="page-persons" class="page">
+    <div class="card">
+        <h2>Personnes</h2>
+        <div class="person-controls">
+            <select id="person-selector">
+                <option value="">-- Choisir --</option>
+            </select>
+            <button class="btn btn-primary" onclick="enrollPerson()">Enroler</button>
+            <button class="btn btn-danger" onclick="forgetPerson()">Oublier</button>
+        </div>
+    </div>
+    <div id="person-detail" class="card">
+        <p class="placeholder-text">Selectionnez une personne pour voir ses details.</p>
+    </div>
+</div>
+
+<!-- ========== PAGE: SETTINGS ========== -->
+<div id="page-settings" class="page">
+
+    <!-- Localisation -->
+    <div class="card">
+        <h2>Localisation</h2>
+        <div class="setting-row">
+            <label for="cfg-LOCATION">Ville</label>
+            <input type="text" id="cfg-LOCATION" placeholder="Paris">
+            <button class="btn btn-ok" onclick="saveSetting('LOCATION')">OK</button>
+        </div>
+        <div class="setting-row">
+            <label for="cfg-TIMEZONE">Fuseau horaire</label>
+            <input type="text" id="cfg-TIMEZONE" placeholder="Europe/Paris">
+            <button class="btn btn-ok" onclick="saveSetting('TIMEZONE')">OK</button>
+        </div>
+    </div>
+
+    <!-- Wake Word -->
+    <div class="card">
+        <h2>Wake Word</h2>
+        <div class="setting-row">
+            <label for="cfg-WAKE_WORD">Mot declencheur</label>
+            <select id="cfg-WAKE_WORD">
+                <option value="hey_reachy">Hey Reachy (custom)</option>
+                <option value="hey_jarvis">Hey Jarvis</option>
+                <option value="alexa">Alexa</option>
+                <option value="hey_mycroft">Hey Mycroft</option>
+                <option value="hey_rhasspy">Hey Rhasspy</option>
+            </select>
+            <button class="btn btn-ok" onclick="saveSetting('WAKE_WORD')">OK</button>
+        </div>
+    </div>
+
+    <!-- Alertes Telegram -->
+    <div class="card">
+        <h2>Alertes Telegram</h2>
+        <div class="setting-row">
+            <label for="cfg-TELEGRAM_ENABLED">Actif</label>
+            <label class="toggle">
+                <input type="checkbox" id="cfg-TELEGRAM_ENABLED" onchange="saveSetting('TELEGRAM_ENABLED')">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="setting-row">
+            <label for="cfg-TELEGRAM_BOT_TOKEN">Bot Token</label>
+            <input type="password" id="cfg-TELEGRAM_BOT_TOKEN" placeholder="Token">
+            <button class="btn btn-ok" onclick="saveSetting('TELEGRAM_BOT_TOKEN')">OK</button>
+        </div>
+        <div class="setting-row">
+            <label for="cfg-TELEGRAM_CHAT_ID">Chat ID</label>
+            <input type="text" id="cfg-TELEGRAM_CHAT_ID" placeholder="Chat ID">
+            <button class="btn btn-ok" onclick="saveSetting('TELEGRAM_CHAT_ID')">OK</button>
+        </div>
+    </div>
+
+    <!-- Alertes Email -->
+    <div class="card">
+        <h2>Alertes Email</h2>
+        <div class="setting-row">
+            <label for="cfg-EMAIL_ENABLED">Actif</label>
+            <label class="toggle">
+                <input type="checkbox" id="cfg-EMAIL_ENABLED" onchange="saveSetting('EMAIL_ENABLED')">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="setting-row">
+            <label for="cfg-EMAIL_GMAIL">Gmail</label>
+            <input type="email" id="cfg-EMAIL_GMAIL" placeholder="user@gmail.com">
+            <button class="btn btn-ok" onclick="saveSetting('EMAIL_GMAIL')">OK</button>
+        </div>
+        <div class="setting-row">
+            <label for="cfg-EMAIL_PASSWORD">Password app</label>
+            <input type="password" id="cfg-EMAIL_PASSWORD" placeholder="Mot de passe app">
+            <button class="btn btn-ok" onclick="saveSetting('EMAIL_PASSWORD')">OK</button>
+        </div>
+        <div class="setting-row">
+            <label for="cfg-EMAIL_RECIPIENT">Destinataire</label>
+            <input type="email" id="cfg-EMAIL_RECIPIENT" placeholder="destinataire@email.com">
+            <button class="btn btn-ok" onclick="saveSetting('EMAIL_RECIPIENT')">OK</button>
+        </div>
+    </div>
+
+    <!-- Cles API -->
+    <div class="card">
+        <h2>Cles API</h2>
+        <div class="setting-row">
+            <label for="cfg-GROQ_API_KEY">Groq</label>
+            <input type="password" id="cfg-GROQ_API_KEY" placeholder="gsk_...">
+            <button class="btn btn-ok" onclick="saveSetting('GROQ_API_KEY')">OK</button>
+        </div>
+        <div class="setting-row">
+            <label for="cfg-DAILY_RECAP_HOUR">Heure recap journal</label>
+            <input type="number" id="cfg-DAILY_RECAP_HOUR" min="0" max="23" placeholder="20">
+            <button class="btn btn-ok" onclick="saveSetting('DAILY_RECAP_HOUR')">OK</button>
+        </div>
+    </div>
+
+    <!-- Bluetooth -->
+    <div class="card">
+        <h2>Bluetooth Audio</h2>
+
+        <!-- Connected device -->
+        <div id="bt-connected" class="bt-status hidden">
+            <div class="bt-device-connected">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#4fc3f7" stroke-width="2" stroke-linecap="round"><path d="M6.5 6.5l11 11L12 23V1l5.5 5.5-11 11"/></svg>
+                <span id="bt-connected-name">--</span>
+                <button class="btn btn-sm btn-danger" onclick="btDisconnect()">Deconnecter</button>
+            </div>
+        </div>
+        <div id="bt-not-connected" class="bt-status">
+            <p class="placeholder-text">Aucun appareil connecte</p>
+        </div>
+
+        <!-- Audio output toggle -->
+        <div class="setting-row" style="margin: 12px 0;">
+            <label>Sortie audio</label>
+            <div class="bt-audio-switch">
+                <button id="btn-audio-usb" class="bt-audio-btn active" onclick="btSwitchAudio('usb')">Reachy (USB)</button>
+                <button id="btn-audio-bt" class="bt-audio-btn" onclick="btSwitchAudio('bt')">Enceinte BT</button>
+            </div>
+        </div>
+
+        <!-- Paired devices -->
+        <div id="bt-paired-section" class="hidden">
+            <h3 style="font-size:0.85rem; color:var(--text-secondary); margin:12px 0 8px;">Appareils appaires</h3>
+            <div id="bt-paired-list"></div>
+        </div>
+
+        <!-- Scan -->
+        <div style="margin-top: 12px; display:flex; gap:8px; align-items:center;">
+            <button id="btn-bt-scan" class="btn btn-primary" onclick="btScan()">Scanner</button>
+            <span id="bt-scan-status" class="placeholder-text"></span>
+        </div>
+        <div id="bt-scan-results" class="hidden" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="card danger-zone">
+        <h2>Danger Zone</h2>
+        <button class="btn btn-danger" onclick="deploy('full')">Redeploiement complet</button>
+    </div>
+</div>
+
+<!-- ========== PAGE: LOGS ========== -->
+<div id="page-logs" class="page">
+    <div class="card">
+        <div class="section-header">
+            <h2>Logs</h2>
+            <div class="log-tabs">
+                <button class="log-tab active" onclick="switchLogTab('main')" data-tab="main">main.py</button>
+                <button class="log-tab" onclick="switchLogTab('conv')" data-tab="conv">conv_app</button>
+                <button class="log-tab" onclick="switchLogTab('system')" data-tab="system">system</button>
+            </div>
+        </div>
+        <div id="logs-container">
+            <div id="logs-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== DIALOGS ========== -->
+<div id="confirm-dialog" class="dialog-overlay hidden">
+    <div class="dialog">
+        <p id="confirm-message">Confirmer cette action ?</p>
+        <div class="dialog-buttons">
+            <button class="btn btn-cancel" onclick="closeConfirm(false)">Annuler</button>
+            <button class="btn btn-primary" onclick="closeConfirm(true)">Confirmer</button>
+        </div>
+    </div>
+</div>
+
+<div id="prompt-dialog" class="dialog-overlay hidden">
+    <div class="dialog">
+        <p id="prompt-message">Entrez une valeur :</p>
+        <input type="text" id="prompt-input" class="prompt-input">
+        <div class="dialog-buttons">
+            <button class="btn btn-cancel" onclick="closePrompt(null)">Annuler</button>
+            <button class="btn btn-primary" onclick="closePrompt(document.getElementById('prompt-input').value)">OK</button>
+        </div>
+    </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

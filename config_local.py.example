@@ -1,0 +1,32 @@
+# config_local.py — credentials locaux (GITIGNORED, ne jamais commiter)
+#
+# Copier ce fichier vers config_local.py puis remplir les valeurs :
+#
+#   cp config_local.py.example config_local.py
+#
+# Ce fichier est importé par config.py via `from config_local import *`.
+# Il surcharge les valeurs vides définies par défaut dans config.py.
+
+# OpenAI, pour Realtime et Whisper
+OPENAI_API_KEY = ""
+
+# Groq, moteur STT alternatif rapide (optionnel)
+GROQ_API_KEY = ""
+
+# Brave Search, utilisée par le tool search exposé au LLM
+# https://brave.com/search/api
+BRAVE_API_KEY = ""
+
+# Hugging Face, pour l'accès aux modèles gated et aux Spaces privés
+HF_TOKEN = ""
+
+# AudD, reconnaissance musicale (optionnel, 500 identifications/mois gratuites)
+# https://audd.io
+AUDD_API_TOKEN = ""
+
+# Telegram, notifications au proche aidant (optionnel)
+TELEGRAM_BOT_TOKEN = ""
+TELEGRAM_CHAT_ID = ""
+
+# Localisation affichée (ville, code postal, région)
+LOCATION = ""

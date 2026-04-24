@@ -1,0 +1,16 @@
+[Unit]
+Description=Reachy Care Controller (web)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pollen
+WorkingDirectory=/home/pollen/reachy_care
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/venvs/apps_venv/bin/python /home/pollen/reachy_care/reachy_controller.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

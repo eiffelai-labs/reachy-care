@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Reachy Care</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Header with robot avatar -->
+    <header id="header" class="header-grid">
+        <div class="header-identity">
+            <div class="robot-avatar" id="robot-avatar"></div>
+            <div class="header-text">
+                <h1>Reachy Care</h1>
+                <span id="status-badge" class="badge badge-offline">Hors ligne</span>
+            </div>
+        </div>
+        <!-- Power controls -->
+        <div class="power-controls">
+            <button class="power-btn power-on" onclick="powerOn()" data-tooltip="Allumer Reachy" data-icon="powerOn"></button>
+            <button class="power-btn power-sleep" onclick="powerSleep()" data-tooltip="Mettre en veille" data-icon="moon"></button>
+            <button class="power-btn power-wake" onclick="powerWake()" data-tooltip="Réveiller" data-icon="wake"></button>
+            <button class="power-btn power-off" onclick="powerOff()" data-tooltip="Arrêter (stop complet)" data-icon="powerOff"></button>
+            <a href="settings.html" class="settings-link" data-tooltip="Paramètres" data-icon="gear"></a>
+        </div>
+        <div class="header-indicators">
+            <div class="indicator">
+                <span class="indicator-label">Mode</span>
+                <span id="indicator-mode" class="indicator-value">--</span>
+            </div>
+            <div class="indicator">
+                <span class="indicator-label">Personne</span>
+                <span id="indicator-person" class="indicator-value">--</span>
+            </div>
+            <div class="indicator">
+                <span class="indicator-label">Uptime</span>
+                <span id="indicator-uptime" class="indicator-value">--</span>
+            </div>
+            <div class="indicator" id="indicator-sleeping-wrap" style="display:none">
+                <span class="indicator-label">Etat</span>
+                <span id="indicator-sleeping" class="indicator-value sleeping-badge">Dort</span>
+            </div>
+            <div class="indicator">
+                <span class="indicator-label">Attention</span>
+                <span id="indicator-attention" class="indicator-value">--</span>
+            </div>
+        </div>
+        <div class="header-wifi-wrap">
+            <div class="indicator indicator-wifi" id="indicator-wifi-wrap">
+                <span class="indicator-label">Wifi</span>
+                <span class="indicator-value">
+                    <span id="indicator-wifi-icon" class="wifi-icon wifi-offline" data-icon="wifiOff" title="Wifi déconnecté"></span>
+                    <span id="indicator-wifi-ssid">--</span>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Video Feed -->
+        <section id="section-video" class="card">
+            <h2>Camera</h2>
+            <div class="video-container">
+                <img id="video-feed" alt="Flux video Reachy" />
+                <div id="video-offline" class="video-overlay">
+                    <span>Flux video indisponible</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Attention (AttenLabs) runtime override -->
+        <section id="section-attenlabs" class="card">
+            <div class="section-header">
+                <h2>Attention (AttenLabs)</h2>
+                <div class="attenlabs-live">
+                    <span id="attenlabs-state-chip" class="state-chip state-chip-muted">—</span>
+                    <span id="attenlabs-speaking-chip" class="state-chip state-chip-speaking" hidden>🔊 PARLE</span>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="toggle-attenlabs" onchange="toggleAttenLabs(this.checked)">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <p id="attenlabs-hint" class="placeholder" style="text-align:left; padding:0;">
+                Chargement...
+            </p>
+        </section>
+
+        <!-- Journal -->
+        <section id="section-journal" class="card">
+            <div class="section-header">
+                <h2>Journal du jour</h2>
+                <select id="person-selector">
+                    <option value="">-- Personne --</option>
+                </select>
+            </div>
+            <div id="journal-content">
+                <p class="placeholder">Aucun evenement aujourd'hui.</p>
+            </div>
+        </section>
+
+        <!-- Activities -->
+        <section id="section-activities" class="card">
+            <h2>Activites</h2>
+            <div id="activities-grid" class="activities-grid">
+                <p class="placeholder">Chargement...</p>
+            </div>
+        </section>
+
+        <!-- Modes -->
+        <section id="section-commands" class="card">
+            <h2>Modes</h2>
+            <div id="modes-grid" class="commands-grid">
+                <p class="placeholder">Chargement...</p>
+            </div>
+            <div class="commands-grid" style="margin-top:12px;">
+                <button class="cmd-btn cmd-btn-danger" onclick="sendCommand({cmd:'stop_speaking'})">
+                    <span class="cmd-icon">🔇</span>
+                    <span>Stop</span>
+                </button>
+                <button class="cmd-btn" onclick="sendCommand({cmd:'mute'})">
+                    <span class="cmd-icon">🤫</span>
+                    <span>Silence</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Logs -->
+        <section id="section-logs" class="card">
+            <div class="section-header">
+                <h2>Logs</h2>
+                <button class="btn-toggle-logs" onclick="toggleLogs()">
+                    <span id="logs-toggle-icon">▼</span>
+                </button>
+            </div>
+            <div id="logs-container" class="logs-container collapsed">
+                <div id="logs-content"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Uninstall confirmation dialog -->
+    <div id="confirm-dialog" class="dialog-overlay hidden">
+        <div class="dialog-box">
+            <p id="confirm-message">Desinstaller ce module ?</p>
+            <div class="dialog-buttons">
+                <button class="btn-cancel" onclick="closeConfirmDialog()">Annuler</button>
+                <button class="btn-confirm" id="btn-confirm-action">Desinstaller</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/config.js"></script>
+    <script src="/static/components/icons.js"></script>
+    <script src="/static/components/reachy.js"></script>
+    <script>
+        // Hydrate SVG assets before app.js wires the rest. IDs and handlers stay intact.
+        (function hydrate() {
+            const avatar = document.getElementById('robot-avatar');
+            if (avatar && window.Reachy) {
+                avatar.replaceChildren(Reachy.render('idle', 48, { showWash: false }));
+            }
+            if (window.Icons) {
+                document.querySelectorAll('[data-icon]').forEach(el => {
+                    const name = el.dataset.icon;
+                    if (name && Icons.has(name)) {
+                        el.replaceChildren(Icons.svg(name, 22));
+                    }
+                });
+            }
+        })();
+    </script>
+    <script src="/static/app.js"></script>
+</body>
+</html>

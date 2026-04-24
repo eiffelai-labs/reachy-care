@@ -1,0 +1,30 @@
+[Unit]
+Description=Reachy Care — main (face reco + wake word + AttenLabs + activities)
+# main.py utilise le bridge IPC vers conv_app_v2 :8766, donc doit démarrer APRES
+After=reachy-care-conv.service reachy-care-aec.service reachy-mini-daemon.service
+Wants=reachy-care-conv.service reachy-care-aec.service reachy-mini-daemon.service
+
+[Service]
+Type=simple
+User=pollen
+Group=pollen
+WorkingDirectory=/home/pollen/reachy_care
+EnvironmentFile=-/home/pollen/reachy_care/.env
+Environment="GST_PLUGIN_PATH=/opt/gst-plugins-rs/lib/aarch64-linux-gnu/gstreamer-1.0"
+Environment="PYTHONPATH=/home/pollen/reachy_care:/home/pollen/reachy_care/tools_for_conv_app"
+Environment="REACHY_CARE_PATH=/home/pollen/reachy_care"
+Environment="REACHY_MINI_CUSTOM_PROFILE=reachy_care"
+Environment="REACHY_MINI_EXTERNAL_PROFILES_DIRECTORY=/home/pollen/reachy_care/external_profiles"
+Environment="REACHY_MINI_EXTERNAL_TOOLS_DIRECTORY=/home/pollen/reachy_care/tools_for_conv_app"
+Environment="AUTOLOAD_EXTERNAL_TOOLS=true"
+ExecStart=/venvs/apps_venv/bin/python /home/pollen/reachy_care/main.py
+Restart=always
+RestartSec=5s
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=15s
+StandardOutput=append:/home/pollen/reachy_care/logs/reachy_care.log
+StandardError=append:/home/pollen/reachy_care/logs/reachy_care.log
+
+[Install]
+WantedBy=multi-user.target

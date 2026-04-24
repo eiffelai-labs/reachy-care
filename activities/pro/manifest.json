@@ -1,0 +1,15 @@
+{
+  "name": "pro",
+  "display_name": "Exposé",
+  "instructions_file": "instructions_pro.txt",
+  "announce_message": "[Reachy Care] MODE EXPOSÉ activé. Tu entres en mode exposé. Demande sur quel sujet faire l'exposé si non précisé.",
+  "gates": {
+    "suppress_face_recognition": true,
+    "silent_face_recognition": false,
+    "suppress_cry_detection": false,
+    "suppress_fall_detection": false,
+    "head_pitch_deg": null,
+    "wake_word_interrupts_reading": false
+  },
+  "tools": []
+}

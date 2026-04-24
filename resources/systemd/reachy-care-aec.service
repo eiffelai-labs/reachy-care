@@ -1,0 +1,49 @@
+[Unit]
+Description=Reachy Care — activation AEC hardware XMOS XVF3800
+After=reachy-mini-daemon.service
+Wants=reachy-mini-daemon.service
+# PartOf propage stop/restart du daemon vers aec.
+# Sans ça, chaque restart daemon (cascade, dashboard, bouton physique) laisse XMOS
+# aux défauts Pollen (OP_L=[8,0] post-PP) → wake_word reçoit signal atténué → scores 0.32.
+# Avec PartOf, aec est re-run à chaque restart daemon → XMOS remis à OP_L=[7,3] (canal ASR).
+PartOf=reachy-mini-daemon.service
+
+[Service]
+Type=oneshot
+User=pollen
+Group=pollen
+#  : sleep bumped 3 → 10s après boot loop identifié par reviewer.
+# Si aec run avant que daemon Pollen ait fini d'initialiser XMOS, un des
+# audio_control_utils.py calls fail → service failed → PartOf cascade
+# conv+main Restart=always → daemon stress → crash → loop.
+# 10s donne au daemon le temps de register ses ALSA devices + HID XMOS ready.
+ExecStartPre=/bin/sleep 10
+# Restart policy : si aec fail (XMOS pas ready), attendre 10s avant retry.
+# Évite cascade en burst avec daemon qui restart trop vite.
+RestartSec=10s
+# Activer AEC far-end DSP + gain unité
+ExecStart=/venvs/mini_daemon/bin/python3 /venvs/mini_daemon/lib/python3.12/site-packages/reachy_mini/media/audio_control_utils.py AUDIO_MGR_FAR_END_DSP_ENABLE --values 1
+ExecStart=/venvs/mini_daemon/bin/python3 /venvs/mini_daemon/lib/python3.12/site-packages/reachy_mini/media/audio_control_utils.py AEC_FAR_EXTGAIN --values 0.0
+# Désactiver AGC XMOS : AGC écrasait la voix sur le bruit ambiant → wake word ~1/100
+ExecStart=/venvs/mini_daemon/bin/python3 /venvs/mini_daemon/lib/python3.12/site-packages/reachy_mini/media/audio_control_utils.py PP_AGCONOFF --values 0
+# PLAN B wake word : canaux USB L/R = ASR output (beamformer seul, pre-PP)
+# Défauts Pollen pour rollback : AUDIO_MGR_OP_L=[8,0], AUDIO_MGR_OP_R=[8,0], AEC_ASROUTONOFF=1, AEC_ASROUTGAIN=1.0
+# Source (7,3) = ASR output du beam auto-select, post-AEC mais pre-PP (pas de NR/de-reverb qui rabotent)
+ExecStart=/venvs/mini_daemon/bin/python3 /venvs/mini_daemon/lib/python3.12/site-packages/reachy_mini/media/audio_control_utils.py AEC_ASROUTONOFF --values 1
+ExecStart=/venvs/mini_daemon/bin/python3 /venvs/mini_daemon/lib/python3.12/site-packages/reachy_mini/media/audio_control_utils.py AEC_ASROUTGAIN --values 1.0
+ExecStart=/venvs/mini_daemon/bin/python3 /venvs/mini_daemon/lib/python3.12/site-packages/reachy_mini/media/audio_control_utils.py AUDIO_MGR_OP_L --values 7 3
+#  soir : split L=ASR (wake word pur) / R=post-PP (conv sans voix voisines)
+# Restauration du pattern  validé par Alexandre — les 2 canaux en ASR (ancien [7,3] [7,3])
+# donnaient 0.3-0.5 au wake word au lieu des 0.8+ d'. Split franc = canal L propre pour ASR.
+ExecStart=/venvs/mini_daemon/bin/python3 /venvs/mini_daemon/lib/python3.12/site-packages/reachy_mini/media/audio_control_utils.py AUDIO_MGR_OP_R --values 8 0
+# Mute speaker interne Reachy Mini 5W (inaudible EHPAD) — signal passe quand
+# même par DSP pour AEC ref. Ciblage par NOM de carte "Audio" (XMOS XVF3800),
+# pas par index. Avant  c'était `-c 0` → mais depuis le swap enceinte Anker
+# (card 0 = S3), `-c 0` mutait l'Anker externe à chaque restart aec → silence
+# total. Bug majeur : deux journées perdues  avant identification.
+ExecStart=/usr/bin/amixer -c Audio sset PCM,0 0% mute
+# Persister l état "activé" pour que les services dépendants voient le unit actif
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

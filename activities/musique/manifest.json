@@ -1,0 +1,15 @@
+{
+  "name": "musique",
+  "display_name": "Musique",
+  "instructions_file": "instructions_musique.txt",
+  "announce_message": "[Reachy Care] MODE MUSIQUE activé. Tu écoutes la musique ambiante avec la personne. Appelle identify_music immédiatement, puis groove sur le rythme. Reste surtout silencieux — la musique parle.",
+  "gates": {
+    "suppress_face_recognition": false,
+    "silent_face_recognition": false,
+    "suppress_cry_detection": false,
+    "suppress_fall_detection": false,
+    "head_pitch_deg": null,
+    "wake_word_interrupts_reading": false
+  },
+  "tools": ["identify_music", "groove"]
+}

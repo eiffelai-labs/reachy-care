@@ -1,0 +1,15 @@
+{
+  "name": "histoire",
+  "display_name": "Histoires",
+  "instructions_file": "instructions_histoire.txt",
+  "announce_message": "[Reachy Care] MODE HISTOIRES activé. Tu entres en mode histoires : livres du domaine public. Propose de choisir un type d'histoire.",
+  "gates": {
+    "suppress_face_recognition": false,
+    "silent_face_recognition": true,
+    "suppress_cry_detection": true,
+    "suppress_fall_detection": false,
+    "head_pitch_deg": null,
+    "wake_word_interrupts_reading": true
+  },
+  "tools": ["gutenberg", "set_reading_voice"]
+}

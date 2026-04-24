@@ -1,0 +1,56 @@
+# ============================================================
+# Pi 4 Cortex-A72 aarch64 — versions épinglées OBLIGATOIRES
+# Ces libs causent SIGILL (exit 132) si upgradées sur ARM Cortex-A72
+# NE JAMAIS faire pip install sans contrainte de version pour ces paquets
+# ============================================================
+onnxruntime==1.21.1
+albumentations<=1.3.1
+numpy==2.2.5
+# ============================================================
+
+# À installer si absent :
+python-chess>=1.10.0
+mediapipe>=0.10.0
+
+# Système (apt, pas pip) :
+# sudo apt install stockfish espeak-ng
+
+# Sound detection (YAMNet TFLite) :
+# pip install tflite-runtime  (ou tensorflow-lite sur Pi)
+# pip install pyaudio          (déjà installé via openwakeword)
+
+# ============================================================
+# Speaker identification (WeSpeaker ResNet34 ONNX)
+#
+# ATTENTION : wespeakerruntime doit être installé --no-deps
+# torchaudio (dépendance déclarée) = SIGILL sur Pi 4 ARM Cortex-A72
+# Notre patch_source.py remplace torchaudio par soundfile+scipy+kaldi
+#
+# Commande correcte (intégrée dans cmd.sh option 1) :
+#   pip install wespeakerruntime --no-deps
+#   pip install soundfile 'kaldi-native-fbank>=1.18.0'
+#   python patch_source.py   ← patche speaker.py automatiquement
+#
+# kaldi-native-fbank : pas de wheel cp312-aarch64 → compile depuis
+# les sources (~3 min sur Pi). Normal, ne pas interrompre.
+# ============================================================
+soundfile>=0.12.0
+kaldi-native-fbank>=1.18.0
+tzdata>=2024.1
+
+# Dashboard web (optionnel — pur Python, pas de problème ARM)
+flask>=3.0.0
+
+# ============================================================
+# STT local pour coups d'échecs vocaux (Vosk — fonctionne offline)
+#
+# pip install vosk
+#
+# Modèle FR petit (~40 MB) — télécharger et dézipper dans models/ :
+#   cd /home/pollen/reachy_care/models
+#   wget https://alphacephei.com/vosk/models/vosk-model-small-fr-0.22.zip
+#   unzip vosk-model-small-fr-0.22.zip
+#   mv vosk-model-small-fr-0.22 vosk-model-small-fr
+# ============================================================
+# vosk==0.3.45  # ATTENTION : installer depuis GitHub, PAS PyPI (aarch64 wheel)
+# pip install https://github.com/alphacep/vosk-api/releases/download/0.3.45/vosk-0.3.45-py3-none-manylinux2014_aarch64.whl
